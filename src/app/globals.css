@@ -1,0 +1,1089 @@
+/* Link Share a Sale — from sites/linkshareasale.html.
+
+   THE LOOK IS A SHOP. Not a shop-themed page: an actual rail of hanging
+   PRICE TAGS, a till RECEIPT, tear-off COUPONS and numbered AISLES, printed
+   on a warm paper stock in near-black ink with one red, one yellow and one
+   blue. Archivo's WIDTH AXIS carries every heading as condensed capitals —
+   the lettering a sale sign is set in — and IBM Plex Mono carries everything
+   a till would have printed.
+
+   Its nearest neighbour in this network is slottering, and the two are not
+   the same thing. slottering is a flat neo-brutalist poster: 3px borders,
+   `6px 6px 0` shadows, hard corners, rectangles. This site is ROUNDED (10
+   to 18px) on 2px borders with `4px 4px 0`, and — the part that matters —
+   almost nothing on it is a rectangle. Every object is a shape that has been
+   CUT: a tag with a clipped shoulder and a punched hole, a receipt torn off
+   at both ends, a coupon perforated down one side with notches punched
+   through the paper. A border does not make a shop; a die-cut does.
+
+   Four things carry it, and none of them is a thing a sibling does:
+
+     THE PRICE TAG. A casino is a tag hanging off a rail — a clipped shoulder
+     (`clip-path`), a punched hole, a kraft string above it, and a small
+     rotation that differs by position so a row reads as things hung by hand
+     rather than a grid. Its outline is FOUR `drop-shadow` FILTERS on a
+     wrapper, because a `clip-path` cuts a border off with everything else;
+     see `.ccard` below.
+
+     THE RECEIPT. The hero's top three print on a till receipt: white, turned
+     1.4°, TORN at the top and bottom (two 45° gradient tiles, not a radius),
+     ruled in dashes, totalled, and finished with a barcode.
+
+     THE COUPON. An offer is a tear-off coupon: a colour STUB down its left
+     side with its type set vertically, a dashed perforation beside it, and
+     two notches punched clean through the card at the ends of that line.
+
+     THE AISLE. Bonus types are numbered aisles — AISLE 01 to AISLE NN —
+     which is where a shop puts the thing you came in for.
+
+   ── Four values do not ship as the mockup draws them ──────────────────────
+
+   THE RED. `--red` #E3361F is 3.87:1 on the paper and 4.36 on white, and
+   white on it is 4.36 — all three under the 4.5 that normal text needs, and
+   it is asked to carry the section kickers at 13px, the "claim" links, the
+   stars, the leader's badge at 15px and every primary button's label at
+   16px. None of those is large text (bold only counts from 18.66px). So the
+   red that CARRIES ANYTHING is `--color-brand` #B7240F: 5.69 on the paper,
+   6.42 on white and 6.42 under white as a fill. The bright #E3361F survives
+   as `--color-signal`, a GRAPHIC-ONLY value, and the only place it is used
+   is the strike-through rule across "Full price" in the hero — a bar with no
+   text on it, at 3.87:1 against the paper.
+
+   THE YELLOW IS A FILL AND NEVER AN EDGE. Ink on #FFD43B is 12.92:1 and it
+   is the best ground on the site, but the yellow itself is 1.26:1 against
+   the paper — so every yellow object keeps the 2px ink border the mockup
+   draws round it. A yellow panel without that border has no shape at all.
+
+   THE STRING. `--kraft` #C9A877 is 1.99:1 on the paper. The string is the
+   one thing that says these cards are HANGING rather than floating, so it
+   ships at #9C7B43 (3.49) — still kraft, and now visible.
+
+   THE EMPTY STAR. The mockup sets filled and empty stars in the same red and
+   tells them apart by glyph (★ vs ☆). The shared `Stars` component in this
+   network tells them apart by COLOUR, so the empty one needs a value of its
+   own: #8A857B, 3.67:1 on white and 3.25 on the paper. The mockup's own
+   hairline #D6D0C2 is 1.54 and would have been invisible.
+
+   ── The ink border is the whole system ────────────────────────────────────
+
+   Every object a reader can press, and every object that holds something,
+   carries a 2px ink border at 18.42:1. That is why this site has no
+   `--color-line-strong` problem and no faint-boundary problem anywhere: the
+   boundary is always the ink. `--color-line` #D6D0C2 exists for ONE job — a
+   DASHED divider inside a card, between a receipt's lines or a tag's two
+   facts — and it is never the edge of anything.
+
+   ── The layering rule ─────────────────────────────────────────────────────
+
+   The button classes, the tag, the coupon, the aisle and the tab are
+   UNLAYERED, so they beat any Tailwind utility (Tailwind 4 puts its own in
+   `@layer utilities`). A `rounded-*`, `bg-*`, `h-*` or `px-*` on an element
+   carrying one of them silently does nothing. **Size a button with
+   `.btn-sm` or `.btn-xs`, never with a utility** — this has bitten six
+   sibling sites and cost one of them a button sliced in half by
+   `overflow-x: clip`. */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #f4f1ea;
+  --foreground: #141414;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* The mockup's --paper / --paper-2 / --white. `cream` is the paper stock
+     the shop is printed on, `paper` the white a tag, a coupon or a receipt is
+     cut from, `surface` the deeper stock of a count pill. */
+  --color-cream: #f4f1ea;
+  --color-paper: #ffffff;
+  --color-surface: #eae5d9;
+
+  /* Ink, in three steps — all three ship exactly as drawn: 16.33 / 9.91 /
+     4.77 on the paper and 18.42 / 11.18 / 5.38 on white. */
+  --color-ink: #141414;
+  --color-ink-soft: #3d3b37;
+  --color-muted: #6e6a62;
+  --color-faint: #6e6a62;
+
+  /* THE RED THAT CARRIES THINGS. Not the mockup's #E3361F — see the header
+     note. 5.69 on the paper, 6.42 on white, 6.42 under white as a fill, so
+     one value does text, links, stars, the badge and every primary button. */
+  --color-brand: #b7240f;
+  --color-brand-btn: #b7240f;
+  --color-brand-dark: #8e1a08;
+  --color-brand-soft: #fde8e4;
+  --color-brand-tint: #fde8e4;
+  --color-brand-ink: #ffffff;
+  --color-brand-shadow: rgba(20, 20, 20, 0.2);
+
+  /* THE BRIGHT RED IS A GRAPHIC. One use: the strike-through rule in the
+     hero. 3.87:1 against the paper, which is what a bar with no text on it
+     needs, and under what anything with text on it does. */
+  --color-signal: #e3361f;
+  --color-red: #b7240f;
+
+  /* THE YELLOW. The best ground on the site (ink on it is 12.92:1) and never
+     an edge (1.26:1 against the paper), so every yellow object keeps its 2px
+     ink border. `accent-ink` is what sits on it. */
+  --color-accent: #ffd43b;
+  --color-accent-light: #fff1b8;
+  --color-accent-dark: #ffd43b;
+  --color-accent-ink: #141414;
+  --color-yel-wash: #fff7d1;
+
+  /* The blue, for a link that is not a call to action. 5.72 on the paper and
+     6.46 on white; ships exactly as drawn. */
+  --color-sea: #1f4fe0;
+  --color-blue: #1f4fe0;
+
+  /* The green a factual chip sits on — the regions an operator says it
+     accepts. The mockup has no green; these are this site's own, measured on
+     white: the text 6.81:1 and 6.54 on its own tint. */
+  --color-green: #0c5e48;
+  --color-green-light: #e2efe5;
+  --color-matcha: #0c5e48;
+  --color-matcha-bg: #e2efe5;
+  --color-win: #0c5e48;
+  --color-win-bg: #e2efe5;
+
+  /* THE INK IS THE BOUNDARY. Every edge on this site is 2px of it at
+     18.42:1, which is why `line` has exactly one job: a DASHED divider
+     INSIDE a card. It is never the edge of anything. */
+  --color-line: #d6d0c2;
+  --color-line-soft: #d6d0c2;
+  --color-line-strong: #141414;
+
+  /* The kraft the tags hang on — raised off the mockup's #C9A877 (1.99:1)
+     so the string is actually visible. */
+  --color-kraft: #9c7b43;
+
+  /* Stars. The brand red carries them (6.42 on white); the EMPTY one needs
+     its own value because this network's `Stars` tells them apart by colour
+     rather than by glyph. */
+  --color-gold: #b7240f;
+  --color-star-empty: #8a857b;
+
+  /* The footer — the one dark surface, and the mockup's own values, all
+     measured on #141414: #E6E2D8 14.24, #BDB8AE 9.33, the yellow 12.92. */
+  --color-navy: #141414;
+  --color-navy-2: #26251f;
+  --color-night-ink: #ffffff;
+  --color-night-muted: #e6e2d8;
+  --color-night-faint: #bdb8ae;
+  --color-night-line: #3a3936;
+  --color-night-accent: #ffd43b;
+  --color-night-green: #ffd43b;
+
+  --font-sans: var(--font-archivo);
+  --font-display: var(--font-archivo);
+  --font-label: var(--font-plex-mono);
+  --font-mono: var(--font-plex-mono);
+
+  /* A tag, a coupon, an aisle. Controls take 12px and panels 16-18px; both
+     are spelled out where they are used. */
+  --radius-card: 14px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-archivo), system-ui, Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── The condensed display face ─────────────────────────────────────────────
+   Every heading, every price and every sale-sign capital.
+
+   `font-stretch` DOES NOTHING unless the variable font is loaded with its
+   WIDTH AXIS — `Archivo({ axes: ['wdth'] })` in layout.tsx. Without it the
+   browser silently renders the normal width and the whole design reads as a
+   generic grotesque, which is exactly what happened on a sibling before
+   netbetus pinned it. If headings here ever stop looking condensed, that
+   import is the first thing to check.
+
+   72% is the mockup's own for headings; `.cond-65` and `.cond-78` are its
+   two other stops, on a logo plate and on a price. */
+.font-display {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 900;
+  font-stretch: 72%;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.cond-65 {
+  font-stretch: 65%;
+}
+.cond-78 {
+  font-stretch: 78%;
+}
+
+/* The till face: kickers, counts, the receipt, the facts under a tag, the
+   footer column heads, every label a shop would have printed rather than
+   set. IBM Plex Mono at 600 — NOT the display face, which is the opposite of
+   most of this network, because a condensed 900 capital at 13px is a blob
+   and a monospace at 13px is a label. */
+.lbl {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The till face WITHOUT the label treatment — the mockup's own `.mono`,
+   which it keeps separate from `.lbl` for exactly this reason.
+   
+   `.lbl` is UNLAYERED and sets `text-transform: uppercase`, so a
+   `normal-case` utility on the element is in `@layer utilities` and silently
+   loses to it. Every sentence set in the till face — the ticker, the
+   breadcrumbs, the T&Cs line, the copyright, an empty state — was written as
+   `lbl ... normal-case` and shipped in full capitals until it was read in a
+   browser. A sentence in tracked capitals at 12px is not a label, it is
+   shouting.
+
+   So: `.lbl` for a LABEL (a kicker, a column head, a count), `.mono` for a
+   SENTENCE that happens to be set in the till face. */
+.mono {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+:focus-visible {
+  outline-color: var(--color-ink);
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────────
+   The mockup's `.btn`: 54px, a 12px corner, a 2px ink border and a HARD
+   offset shadow — `4px 4px 0` of the ink, never a blur. On hover it steps
+   towards the reader and the shadow grows; on `:active` it presses INTO the
+   page and the shadow collapses to 1px. That travel is the whole feedback
+   model on this site and it is on every pressable thing.
+
+   UNLAYERED, so a `bg-*`, `rounded-*`, `h-*` or `px-*` on the element loses
+   to these. Size with `.btn-sm` / `.btn-xs`, never a utility — see the
+   header note. */
+.btn-or,
+.btn-ln,
+.btn-gold,
+.btn-on-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 28px;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--color-ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease;
+}
+.btn-or:hover,
+.btn-ln:hover,
+.btn-gold:hover,
+.btn-on-dark:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--color-ink);
+}
+.btn-or:active,
+.btn-ln:active,
+.btn-gold:active,
+.btn-on-dark:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
+/* The primary. #B7240F, not the mockup's #E3361F — white on that is 4.36:1
+   and this label is 16px bold, which is not large text. */
+.btn-or {
+  background: var(--color-brand-btn);
+  color: #ffffff;
+}
+.btn-or:hover {
+  background: var(--color-brand-dark);
+  color: #ffffff;
+}
+
+/* The secondary: white, which on this paper is a real step and needs no
+   second colour. */
+.btn-ln {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.btn-ln:hover {
+  background: var(--color-accent-light);
+  color: var(--color-ink);
+}
+
+/* The yellow. Ink on it is 12.92:1 and it is the loudest ground here, so it
+   is spent on exactly one thing at a time — the hero's second action, a
+   price, a bonus bar. */
+.btn-gold {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+.btn-gold:hover {
+  background: var(--color-accent-light);
+  color: var(--color-accent-ink);
+}
+
+/* For the one dark ground on the site. The border and the shadow invert to
+   the paper, or a 2px ink edge on an ink footer is nothing at all. */
+.btn-on-dark {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-paper);
+  box-shadow: 4px 4px 0 var(--color-paper);
+}
+.btn-on-dark:hover {
+  background: var(--color-accent-light);
+  color: var(--color-accent-ink);
+  box-shadow: 6px 6px 0 var(--color-paper);
+}
+.btn-on-dark:active {
+  box-shadow: 1px 1px 0 var(--color-paper);
+}
+
+/* ── The small button ───────────────────────────────────────────────────────
+   The mockup's own `.btn-sm`: 46px on 18px of padding with a 3px shadow, for
+   a button inside a tag, a coupon or a strip.
+
+   IT HAS TO BE A CLASS. The four classes above are unlayered and pin
+   `min-height: 54px` and `padding: 0 28px`, so `min-h-[46px]`, `h-[46px]` or
+   `px-4` on the element is in `@layer utilities` and silently loses. On a
+   sibling that cost every in-card button its size and pushed a cookie
+   banner's two buttons past the edge of their own card, where
+   `overflow-x: clip` then cut the second one in half. */
+.btn-sm {
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 15px;
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.btn-sm:hover {
+  box-shadow: 5px 5px 0 var(--color-ink);
+}
+.btn-on-dark.btn-sm {
+  box-shadow: 3px 3px 0 var(--color-paper);
+}
+.btn-on-dark.btn-sm:hover {
+  box-shadow: 5px 5px 0 var(--color-paper);
+}
+
+/* Narrower still, for two buttons sharing a phone-width row. */
+.btn-xs {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.btn-xs:hover {
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+/* Kept so the shared vocabulary resolves. `btn-flat` means "do not travel" —
+   used where the button sits inside something that is itself moving. */
+.btn-flat,
+.btn-flat:hover,
+.btn-flat:active {
+  transform: none;
+}
+
+/* ── THE PRICE TAG ──────────────────────────────────────────────────────────
+   The mockup's `.tagwrap` + `.tagbody`, and the one piece of CSS on this
+   site that needs explaining.
+
+   A tag is a shape with its top two corners CUT OFF, which is `clip-path`.
+   But `clip-path` clips the border with everything else, so a bordered tag
+   loses its outline the moment it is cut. The outline is therefore drawn as
+   FOUR `drop-shadow` filters on the WRAPPER — one per direction, each 2px
+   of solid ink, which together trace the clipped silhouette exactly. It is
+   the only way to stroke a clipped shape in CSS without an SVG, and it is
+   why the tag is two elements rather than one.
+
+   `filter` creates a containing block for fixed-position descendants and a
+   new stacking context, which is harmless here and worth knowing: nothing
+   inside a tag may be `position: fixed`. */
+.tagwrap {
+  display: flex;
+  filter: drop-shadow(2px 0 0 #141414) drop-shadow(-2px 0 0 #141414)
+    drop-shadow(0 2px 0 #141414) drop-shadow(0 -2px 0 #141414);
+}
+.ccard {
+  position: relative;
+  flex: 1;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  /* The cut shoulder: full width from 9% down, tapering in to 18%/82% at the
+     very top, which is the silhouette of a swing tag. */
+  clip-path: polygon(18% 0, 82% 0, 100% 9%, 100% 100%, 0 100%, 0 9%);
+  border-radius: 0 0 16px 16px;
+}
+
+/* The punched hole. The PAGE colour, not transparent: a real hole would
+   need the tag's background to be knocked out, and a disc of the ground with
+   a 2px ink ring is indistinguishable at any size and costs one element. IT
+   MUST BE RE-COLOURED if a tag is ever put on anything but the page. */
+.tag-hole {
+  background: var(--color-cream);
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+}
+
+/* The string the tag hangs from. Raised off the mockup's kraft — see the
+   header note — and 2px so it reads at all. */
+.tag-string {
+  background: var(--color-kraft);
+}
+
+/* The rotations. A rail of tags hung by hand is not a grid, so each one sits
+   a fraction off true — and straightens when it is pointed at, which is what
+   picking a tag up to read it does.
+
+   `:nth-child` and not a `data-` attribute, deliberately: this is RHYTHM and
+   carries no meaning, so it does not matter which tag gets which angle when
+   the API's ordering changes. The sibling rule about `data-tone` applies to
+   colour that MEANS something; an angle does not. */
+.tag-list > *:nth-child(3n + 1) .ccard-rot {
+  transform: rotate(-1deg);
+}
+.tag-list > *:nth-child(3n + 2) .ccard-rot {
+  transform: rotate(0.6deg);
+}
+.tag-list > *:nth-child(3n) .ccard-rot {
+  transform: rotate(-0.4deg);
+}
+.ccard-rot {
+  transition: transform 0.2s ease;
+}
+
+/* Straight on a phone — the mockup's own `@media(max-width:640px)
+   .tag:nth-child(n){transform:none}`. In one column a tilt is not a rail of
+   tags hung by hand, it is a column of things that failed to line up, and at
+   that width the rotation also costs real horizontal room. */
+@media (max-width: 40rem) {
+  .tag-list > *:nth-child(3n + 1) .ccard-rot,
+  .tag-list > *:nth-child(3n + 2) .ccard-rot,
+  .tag-list > *:nth-child(3n) .ccard-rot {
+    transform: none;
+  }
+}
+.tag-list > * .ccard-rot:hover,
+.tag-list > * .ccard-rot:focus-within {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.cc-name {
+  transition: color 0.12s ease;
+}
+.ccard:hover .cc-name,
+.ccard:focus-within .cc-name {
+  color: var(--color-brand);
+}
+
+/* The logo plate. The mockup fills it with INK and sets the operator's name
+   in yellow on it — which cannot ship, because roughly half the operator
+   artwork in this catalogue is a JPEG with its own WHITE GROUND BAKED IN and
+   every one of those renders as a white rectangle floating in a black
+   square. Every site in this network that tried a dark plate hit it.
+
+   So the plate is WHITE with the same 2px ink edge everything else here has,
+   and the fallback — an operator with no artwork — gets the ink fill and the
+   yellow lettering the mockup drew, because there is no image to fight. */
+.clogo {
+  background: var(--color-paper);
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.clogo-empty {
+  background: var(--color-ink);
+  color: var(--color-accent);
+}
+
+/* The leader's badge — the mockup's `.badge`: pinned off the tag's top-right
+   corner and turned 6°, as a sticker slapped on. Red-dk, because white on
+   the bright red is 4.36:1 and this is 15px. */
+.flag {
+  background: var(--color-brand);
+  color: #ffffff;
+  border: 2px solid var(--color-ink);
+  transform: rotate(6deg);
+}
+
+/* The price block on a tag, and the bonus bar on a detail page — the
+   mockup's `.price` / `.bonusbar`. Yellow, and ALWAYS with its ink border:
+   the yellow is 1.26:1 against the paper and has no shape without it. */
+.deep-panel {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+}
+
+/* The two facts under a price, between dashed rules — the one job
+   `--color-line` has on this site. */
+.facts {
+  border-top: 1.5px dashed var(--color-line);
+  border-bottom: 1.5px dashed var(--color-line);
+}
+.facts > * + * {
+  border-left: 1.5px dashed var(--color-line);
+}
+
+/* ── THE RECEIPT ────────────────────────────────────────────────────────────
+   The hero's top three, printed on a till receipt: white, turned 1.4°, and
+   TORN at both ends.
+
+   The tear is two 45° gradient tiles laid over each other on a 12px pitch —
+   one leaning each way — so the edge is a row of triangles of the PAGE
+   colour punched into the white. A `border-radius` cannot make a torn edge
+   and an SVG mask would be a file to load for something nobody is meant to
+   notice. Like the tag's hole, the tear is painted in the page colour, so it
+   only works on the page. */
+.receipt {
+  position: relative;
+  background: var(--color-paper);
+  box-shadow: 0 22px 40px rgba(20, 20, 20, 0.14);
+  transform: rotate(1.4deg);
+}
+.receipt::before,
+.receipt::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background:
+    linear-gradient(135deg, var(--color-cream) 6px, transparent 0) 0 0 / 12px 12px repeat-x,
+    linear-gradient(-135deg, var(--color-cream) 6px, transparent 0) 0 0 / 12px 12px repeat-x;
+}
+.receipt::before {
+  top: 0;
+}
+.receipt::after {
+  bottom: 0;
+  transform: rotate(180deg);
+}
+
+/* A line on the receipt. Dashed rules, and a yellow wash when it is pointed
+   at — the one hover state on the site that is not a travel. */
+.pick {
+  border-bottom: 1.5px dashed var(--color-line);
+  transition: background-color 0.12s ease;
+}
+.pick:last-child {
+  border-bottom: 0;
+}
+.pick:hover,
+.pick:focus-within {
+  background: var(--color-yel-wash);
+}
+.pick-name {
+  transition: color 0.12s ease;
+}
+
+/* The barcode. A repeating gradient at four bar widths, which is close
+   enough to a real EAN to read as one and is one declaration.
+   `aria-hidden` in the markup: it encodes nothing. */
+.barcode {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink) 0 2px,
+    transparent 2px 4px,
+    var(--color-ink) 4px 5px,
+    transparent 5px 9px,
+    var(--color-ink) 9px 12px,
+    transparent 12px 14px
+  );
+}
+
+/* ── THE COUPON ─────────────────────────────────────────────────────────────
+   An offer — the mockup's `.offer`: a 2px ink card with a colour STUB down
+   its left side, the type set vertically on it, a dashed perforation beside
+   it, and two notches punched clean through the card at the ends of that
+   line.
+
+   The notches are discs of the PAGE colour with a 2px ink ring, placed HALF
+   OUTSIDE the card at the two ends of the perforation — and the card's
+   `overflow: hidden` is what turns each one into a notch rather than a
+   floating circle: it clips the outer half away and leaves a semicircle
+   punched into the edge. Like the tag's hole and the receipt's tear, the
+   notch is painted in the PAGE colour, so a coupon only works on the page
+   ground.
+
+   goodnewsdrop also has a clip-out coupon; it is a different object. There
+   the whole card is a dashed box with scissors notched into its TOP rule.
+   Here the perforation runs down ONE SIDE and separates a stub from a body,
+   which is what a cloakroom ticket does. */
+.offer {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  transition: transform 0.15s ease;
+}
+.offer:hover,
+.offer:focus-within {
+  transform: translateY(-3px);
+}
+.oimg {
+  background: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* The stub. `--c` arrives from the markup. White on all three of its tones
+   is 6.42 / 6.46 / 18.42. */
+/* The stub, and THE PERFORATION ON ITS RIGHT EDGE. The dashes are WHITE,
+   not the mockup's ink: a dashed border paints its dashes in the border
+   colour and shows the ELEMENT's background through the gaps, so on an ink
+   stub an ink perforation is ink on ink and disappears entirely — which is
+   what one of the three tones here is. White reads on all three (6.42 on the
+   red, 6.46 on the blue, 18.42 on the ink) and is also what a real
+   perforation looks like: a line of holes with the light behind them. */
+.o-kind {
+  background: var(--c);
+  color: #ffffff;
+  border-right: 2px dashed var(--color-paper);
+}
+
+/* The type on the stub, read bottom-to-top. NO `white-space: nowrap`, which
+   is the mockup's own and could not ship: its demo kinds are one short word
+   ("Welcome", "Cashback") and this catalogue's run to "No Deposit Offers",
+   which at 19px is about 190px of vertical type in a 170px cell. Without the
+   nowrap the line simply wraps into a second column of vertical type, which
+   is what a real cloakroom ticket does with a long word anyway. */
+.o-kind > span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: 100%;
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 900;
+  font-stretch: 65%;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* The two punched notches. */
+.o-notch {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-cream);
+  border: 2px solid var(--color-ink);
+  z-index: 1;
+}
+
+/* ── THE AISLES ─────────────────────────────────────────────────────────────
+   Bonus types as numbered aisles. 2px ink, 14px, white — and they go YELLOW
+   on hover, which is the only place on the site a whole object changes
+   colour rather than moving. */
+.btypes {
+  display: grid;
+}
+.btype {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  transition:
+    background-color 0.12s ease,
+    transform 0.12s ease;
+}
+.btype:hover,
+.btype:focus-visible {
+  background: var(--color-accent);
+  transform: translateY(-3px);
+}
+.btype-no {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+.btype-ic {
+  display: grid;
+  place-items: center;
+  color: var(--color-ink);
+}
+.btype-ct {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  color: var(--color-ink-soft);
+}
+
+/* ── The category tabs ──────────────────────────────────────────────────────
+   Pills on a 2px ink edge, white, washing yellow on hover; the current one
+   fills SOLID INK with its count in yellow. 18.42:1 and 12.92:1 — the
+   strongest pair on the site, spent on the one control that changes what is
+   below it. */
+.tab {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+.tab:hover {
+  background: var(--color-accent-light);
+}
+.tab-on,
+.tab-on:hover {
+  background: var(--color-ink);
+  color: #ffffff;
+}
+.tab-count {
+  background: var(--color-surface);
+  border-radius: 999px;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  color: var(--color-ink);
+}
+.tab-on .tab-count {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* ── Customer service (the FAQ) ─────────────────────────────────────────────
+   ONE white panel on a 2px ink edge, its questions parted by 2px ink rules —
+   not a card each. A shop has one notice board, and the ticket numbers down
+   its left margin (Q-001, Q-002) are what make it one.
+
+   The `+` is a 10px square that rotates 45° into an × and fills red. */
+.faq-sheet {
+  background: var(--color-paper);
+  border: 2px solid var(--color-ink);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.fq {
+  border-bottom: 2px solid var(--color-ink);
+}
+.fq:last-child {
+  border-bottom: 0;
+}
+.fq summary:hover {
+  background: var(--color-yel-wash);
+}
+.fq-q {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+.fq-head {
+  transition: color 0.12s ease;
+}
+.pm {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.fq[open] .pm {
+  transform: rotate(45deg);
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+/* A method step, and the glance sheet's dashed rules. */
+.step {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
+.glance {
+  border-top: 1.5px dashed var(--color-ink);
+  border-bottom: 1.5px dashed var(--color-ink);
+}
+
+/* ── The hero's two marks ───────────────────────────────────────────────────
+   `.hl` is the mockup's `h1 em`: the phrase that matters, in the red that
+   can carry text.
+
+   `.strike` is the struck-out "full price" — grey type with a bright red bar
+   through it at -4°. The ONE use of `--color-signal` on the site, and the
+   one place the bright red is allowed, because the bar carries no text:
+   3.87:1 against the paper, over the 3 a graphic needs and under the 4.5
+   anything with words on it would need. */
+.hl {
+  color: var(--color-brand);
+}
+.strike {
+  position: relative;
+  color: var(--color-muted);
+}
+.strike::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 50%;
+  height: 0.09em;
+  background: var(--color-signal);
+  transform: rotate(-4deg);
+}
+
+/* Kept so the shared class vocabulary holds across the network. A section
+   here is announced by its kicker and a 2px ink rule under its heading,
+   which `SectionHead` draws itself. */
+.rule-double,
+.rule-head {
+  border-bottom: 0;
+}
+.slab,
+.hard-gold,
+.pull,
+.screen {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.beat {
+  background: var(--color-brand);
+  border-radius: 50%;
+}
+.hatch,
+.ix-dots,
+.offer-scissors {
+  display: none;
+}
+.dropcap::first-letter {
+  font-size: inherit;
+  float: none;
+}
+.fq-answer::before {
+  content: none;
+}
+
+/* Everything here either travels or washes; under a motion preference it
+   washes only. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-or,
+  .btn-ln,
+  .btn-gold,
+  .btn-on-dark,
+  .offer,
+  .btype,
+  .tab,
+  .pm,
+  .ccard-rot,
+  .cc-name,
+  .fq-head,
+  .pick {
+    transition: none;
+  }
+  .btn-or:hover,
+  .btn-ln:hover,
+  .btn-gold:hover,
+  .btn-on-dark:hover,
+  .btn-or:active,
+  .btn-ln:active,
+  .btn-gold:active,
+  .btn-on-dark:active,
+  .offer:hover,
+  .offer:focus-within,
+  .btype:hover,
+  .btype:focus-visible {
+    transform: none;
+  }
+  /* The tags stay where they were hung rather than snapping straight. */
+  .tag-list > * .ccard-rot:hover,
+  .tag-list > * .ccard-rot:focus-within {
+    transform: none;
+  }
+  .tag-list > *:nth-child(3n + 1) .ccard-rot,
+  .tag-list > *:nth-child(3n + 2) .ccard-rot,
+  .tag-list > *:nth-child(3n) .ccard-rot {
+    transform: none;
+  }
+  .receipt {
+    transform: none;
+  }
+}
+/* ── Responsive safety net (all phones / tablets / laptops / large screens) ── */
+html {
+  -webkit-text-size-adjust: 100%; /* no iOS text auto-inflation on rotate */
+  scroll-behavior: smooth;
+}
+body {
+  overflow-x: clip; /* never scroll the page sideways; safe with the sticky header */
+}
+
+/* Hide the scrollbar on horizontally-scrollable rows (e.g. the tab strip). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scraped HTML content (casino / offer descriptions) must stay in its column
+   on small screens: wrap long words, cap media width, scroll wide tables. */
+.prose {
+  overflow-wrap: break-word;
+}
+
+/* ── Prose colours ──────────────────────────────────────────────────────────
+   Pinned to this site's own tokens rather than left to the typography plugin's
+   defaults. The plugin's light palette is close enough to look fine at a
+   glance, which is the trap: its greys are warm-neutral, this ground is cool,
+   and its link blue belongs to no part of this palette. One place, and it
+   cannot drift from the tokens above.
+
+   EVERY PIECE OF PROSE ON THIS SITE IS ON A WHITE CARD — a casino's
+   description, an offer's terms, a legal page — so these are CARD colours.
+   Any new route that renders `.prose` has to put a white card under it.
+
+   `prose-invert` must NOT be used here. The invert variables are given the
+   same values anyway, so a stray class degrades to "correct" rather than to
+   unreadable. */
+.prose {
+  --tw-prose-body: var(--color-ink-soft);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-lead: var(--color-muted);
+  --tw-prose-links: var(--color-brand);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-muted);
+  --tw-prose-hr: var(--color-line);
+  --tw-prose-quotes: var(--color-ink);
+  --tw-prose-quote-borders: var(--color-brand);
+  --tw-prose-captions: var(--color-faint);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-pre-code: var(--color-night-muted);
+  --tw-prose-pre-bg: var(--color-ink);
+  --tw-prose-th-borders: var(--color-ink);
+  --tw-prose-td-borders: var(--color-line);
+  --tw-prose-invert-body: var(--color-ink-soft);
+  --tw-prose-invert-headings: var(--color-ink);
+  --tw-prose-invert-lead: var(--color-muted);
+  --tw-prose-invert-links: var(--color-brand);
+  --tw-prose-invert-bold: var(--color-ink);
+  --tw-prose-invert-counters: var(--color-muted);
+  --tw-prose-invert-bullets: var(--color-muted);
+  --tw-prose-invert-hr: var(--color-line);
+  --tw-prose-invert-quotes: var(--color-ink);
+  --tw-prose-invert-quote-borders: var(--color-brand);
+  --tw-prose-invert-captions: var(--color-faint);
+  --tw-prose-invert-code: var(--color-ink);
+  --tw-prose-invert-pre-code: var(--color-night-muted);
+  --tw-prose-invert-pre-bg: var(--color-ink);
+  --tw-prose-invert-th-borders: var(--color-ink);
+  --tw-prose-invert-td-borders: var(--color-line);
+}
+
+/* And the colours again, directly on the elements.
+   The variables above are the plugin's own mechanism, and they do work — but
+   they route through two indirections (`--tw-prose-headings` →
+   `--tw-prose-invert-*` → a theme token), and any link in that chain going
+   missing lands an unstyled heading on this ground. These rules do not depend
+   on the chain at all. `:where()` keeps specificity at zero, exactly as the
+   plugin does, so a utility class on the element still wins. */
+.prose {
+  color: var(--color-ink-soft);
+}
+.prose :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 900;
+  font-stretch: 72%;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.prose :where(strong, b, th, dt) {
+  color: var(--color-ink);
+}
+.prose :where(a) {
+  color: var(--color-brand);
+}
+.prose :where(li)::marker,
+.prose :where(ol > li)::marker {
+  color: var(--color-muted);
+}
+.prose :where(blockquote) {
+  color: var(--color-ink);
+  border-inline-start-color: var(--color-brand);
+}
+.prose :where(hr) {
+  border-color: var(--color-line);
+}
+.prose :where(code) {
+  color: var(--color-ink);
+}
+.prose :where(img, video, iframe) {
+  max-width: 100%;
+  height: auto;
+}
+.prose :where(table) {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+.prose :where(pre) {
+  overflow-x: auto;
+}
+
+/* ── Touch readability floor (phones and tablets, ≤1024px) ──
+   `text-xs` is 12px on desktop, where it suits eyebrow labels and footer
+   meta, but 12px body-ish text on a phone fails the 14px readability floor;
+   raise it to 14px there. Form fields go to 16px because iOS Safari zooms the
+   whole page when a smaller field takes focus. Width-based rather than
+   `pointer: coarse` on purpose: an iPad in a desktop-class browser reports a
+   fine pointer and would be missed. Unlayered on purpose so it wins over the
+   `@layer utilities` Tailwind classes regardless of source order.
+
+   ONLY sizes BELOW 14px belong in this list. The rule SETS 0.875rem, so
+   naming a 15px or 16px class here would SHRINK it on a phone. */
+@media (max-width: 1024px) {
+  .text-xs,
+  .sm\:text-xs,
+  .md\:text-xs,
+  .lg\:text-xs,
+  /* The LITERAL sizes this design uses for kickers, captions, labels, chips
+     and counts. An arbitrary-value utility is its own class, so
+     `text-[12.5px]` is never covered by the `.text-xs` list above and has to
+     be named. SURVEY THE WHOLE SITE, not the home page: `text-[11px]` and
+     `text-[10.5px]` are used only by the DETAIL pages and the logo strapline,
+     and on a sibling they shipped at 11px on a phone because the first
+     version of this list was written from the home page alone. */
+  .text-\[10\.5px\],
+  .text-\[11px\],
+  .text-\[11\.5px\],
+  .text-\[12px\],
+  .text-\[12\.5px\],
+  .text-\[13px\],
+  .text-\[13\.5px\] {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42">
+  <!-- Link Share a Sale mark: A PRICE TAG WITH A CHAIN LINK IN IT. A yellow
+       swing tag with both top corners cut off and a punched hole, holding two
+       interlocking links — one red, one ink. The same drawing as
+       src/components/Logo.tsx, set on the 42x42 plate every icon in this
+       network uses.
+
+       The first <rect fill> is what app/apple-icon.tsx reads as the 180x180
+       background plate — the PAPER, so iOS composites the tag onto the shop's
+       own stock rather than onto black.
+
+       The first link is #B7240F and not the mockup's #E3361F: that red is
+       3.06:1 on the yellow, and at the 16px this is rasterised to in a tab
+       the two links have to be told apart from each other and from the tag
+       behind them. 4.50:1 instead, and it is the same red every other red
+       thing on the site uses.
+
+       src/app/favicon.ico is the same artwork rasterised at 16/32/48 — see
+       scripts/make-favicon.py, where the tag is built from a rounded rect and
+       two triangles, and the two links are RINGS rather than stadiums,
+       because that file has no path parser and a ring reads better than a
+       stadium at 16px anyway. -->
+  <rect width="42" height="42" rx="10" fill="#f4f1ea"/>
+  <g transform="translate(0.6 0.6) scale(0.85)">
+    <path d="M14 4h20l10 10v30H4V14z" fill="#ffd43b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="24" cy="13" r="3.5" fill="#f4f1ea" stroke="#141414" stroke-width="2"/>
+    <rect x="11" y="24" width="15" height="10" rx="5" fill="none" stroke="#b7240f" stroke-width="3"/>
+    <rect x="22" y="28" width="15" height="10" rx="5" fill="none" stroke="#141414" stroke-width="3"/>
+  </g>
+</svg>
